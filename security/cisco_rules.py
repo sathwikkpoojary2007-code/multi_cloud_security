@@ -1,4 +1,4 @@
-def check_s3_security(resource):
+def check_cisco_security(resource):
 
     findings = []
 
@@ -7,14 +7,14 @@ def check_s3_security(resource):
     if security.get("exposure", 0.0) == 1.0:
 
         findings.append({
-            "provider": "aws",
+            "provider": "cisco",
             "resource_id": resource.get("resource_id"),
-            "rule": "AWS-S3-001",
+            "rule": "CISCO-FW-001",
             "severity": "HIGH",
-            "title": "S3 Block Public Access is not fully enabled",
+            "title": "Overly permissive firewall rule",
             "description": (
-                "One or more S3 public access block controls "
-                "are disabled."
+                "Firewall rule allows any protocol from any source "
+                "to any destination."
             )
         })
 

@@ -27,11 +27,13 @@ def calculate_risk(exposure, privilege, encryption, logging):
 
 
 # Test calculation
-risk = calculate_risk(
-    exposure=1.0,
-    privilege=0.0,
-    encryption=0.0,
-    logging=0.0
-)
+if __name__ == "__main__":
 
-print("Risk Score:", risk)
+    risk = calculate_risk(
+        exposure=1.0,
+        privilege=0.0,
+        encryption=0.0,
+        logging=0.0
+    )
+
+    print("Risk Score:", risk)
