@@ -1,0 +1,163 @@
+"""MultiCloudSecurity benchmark mappings.
+
+Important:
+These are project-level mappings created from the uploaded CIS Controls
+v8.1.2, NIST CSF 2.0, and NIST SP 800-53 Revision 5.1-derived control
+material. They are not presented as official CIS/NIST crosswalks.
+
+Each benchmark item is intended to be machine-evaluable against the
+normalized common model used by MultiCloudSecurity.
+"""
+
+BENCHMARKS = [
+    {
+        "id": "MC-001",
+        "name": "Public exposure is minimized",
+        "dimension": "exposure",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-4.1", "CIS-12.2"],
+        "nist_csf": ["PR.IR-01", "PR.PS-01"],
+        "nist_sp_800_53": ["SC-7", "CM-6"],
+        "check": "security.exposure == 0.0",
+        "remediation_goal": "Remove unintended public exposure or restrict access to an explicitly approved boundary.",
+    },
+    {
+        "id": "MC-002",
+        "name": "Sensitive data is encrypted at rest",
+        "dimension": "encryption",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-3.11"],
+        "nist_csf": ["PR.DS-01"],
+        "nist_sp_800_53": ["SC-28", "SC-13"],
+        "check": "security.encryption == 0.0",
+        "remediation_goal": "Enable an appropriate storage/data-at-rest encryption mechanism.",
+    },
+    {
+        "id": "MC-003",
+        "name": "Sensitive data in transit is protected",
+        "dimension": "encryption",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-3.10"],
+        "nist_csf": ["PR.DS-02"],
+        "nist_sp_800_53": ["SC-8", "SC-13"],
+        "check": "transport_security_is_approved",
+        "remediation_goal": "Require approved encrypted transport such as TLS/HTTPS where supported.",
+    },
+    {
+        "id": "MC-004",
+        "name": "Secure configuration baseline is maintained",
+        "dimension": "configuration_security",
+        "severity": "MEDIUM",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-4.1", "CIS-4.2", "CIS-4.6"],
+        "nist_csf": ["PR.PS-01"],
+        "nist_sp_800_53": ["CM-2", "CM-3", "CM-6"],
+        "check": "security.configuration_security == 0.0",
+        "remediation_goal": "Restore the approved baseline and record the configuration change.",
+    },
+    {
+        "id": "MC-005",
+        "name": "Least privilege and access controls are enforced",
+        "dimension": "privilege",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-5.1", "CIS-6.1", "CIS-6.3"],
+        "nist_csf": ["PR.AA-05"],
+        "nist_sp_800_53": ["AC-3", "AC-6", "IA-2"],
+        "check": "security.privilege == 0.0",
+        "remediation_goal": "Remove excessive permissions and enforce approved least-privilege access.",
+    },
+    {
+        "id": "MC-006",
+        "name": "Audit logging is enabled",
+        "dimension": "logging",
+        "severity": "MEDIUM",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-8.1", "CIS-8.2"],
+        "nist_csf": ["PR.PS-04"],
+        "nist_sp_800_53": ["AU-2", "AU-12"],
+        "check": "security.logging == 0.0",
+        "remediation_goal": "Enable required audit logging and make the records available for monitoring.",
+    },
+    {
+        "id": "MC-007",
+        "name": "Audit records support investigation",
+        "dimension": "logging",
+        "severity": "MEDIUM",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-8.5", "CIS-8.9", "CIS-8.11"],
+        "nist_csf": ["DE.AE-03", "DE.CM-01"],
+        "nist_sp_800_53": ["AU-3", "AU-6", "SI-4"],
+        "check": "detailed_and_reviewable_logs",
+        "remediation_goal": "Increase audit detail and centralize/review records where supported.",
+    },
+    {
+        "id": "MC-008",
+        "name": "Network security controls are enforced",
+        "dimension": "network_security",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-12.2", "CIS-12.3", "CIS-13.1"],
+        "nist_csf": ["PR.IR-01", "DE.CM-01"],
+        "nist_sp_800_53": ["SC-7", "SI-4"],
+        "check": "security.network_security == 0.0",
+        "remediation_goal": "Restrict broad network paths/rules and restore the approved network security baseline.",
+    },
+    {
+        "id": "MC-009",
+        "name": "Identity security is maintained",
+        "dimension": "identity_security",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-5.1", "CIS-6.1"],
+        "nist_csf": ["PR.AA-05"],
+        "nist_sp_800_53": ["IA-2", "AC-6"],
+        "check": "security.identity_security == 0.0",
+        "remediation_goal": "Correct identity, authentication, authorization, or MFA weaknesses detected by the connector.",
+    },
+    {
+        "id": "MC-010",
+        "name": "Vulnerabilities and detected weaknesses are remediated",
+        "dimension": "configuration_security",
+        "severity": "HIGH",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-7.2", "CIS-7.7"],
+        "nist_csf": ["ID.RA-01", "ID.RA-06", "RS.MI-01", "RS.MI-02"],
+        "nist_sp_800_53": ["RA-5", "SI-2", "IR-4"],
+        "check": "findings_are_remediated_and_verified",
+        "remediation_goal": "Apply an approved correction, re-scan the resource, and verify the weakness is gone.",
+    },
+    {
+        "id": "MC-011",
+        "name": "Recovery capability is protected and testable",
+        "dimension": "configuration_security",
+        "severity": "HIGH",
+        "providers": ["aws", "azure"],
+        "cis": ["CIS-11.4", "CIS-11.5"],
+        "nist_csf": ["RC.RP-02", "RC.RP-05"],
+        "nist_sp_800_53": ["CP-10"],
+        "check": "recovery_configuration_is_approved",
+        "remediation_goal": "Maintain an approved recovery configuration and verify restoration integrity.",
+    },
+    {
+        "id": "MC-012",
+        "name": "Risk is calculated and prioritized consistently",
+        "dimension": "governance",
+        "severity": "MEDIUM",
+        "providers": ["aws", "azure", "cisco", "cloudflare"],
+        "cis": ["CIS-7.2"],
+        "nist_csf": ["GV.RM-06", "ID.RA-05", "ID.RA-06"],
+        "nist_sp_800_53": ["RA-5"],
+        "check": "risk_score_present_and_explainable",
+        "remediation_goal": "Record the evidence, benchmark failures, risk score, priority, and remediation decision.",
+    },
+]
+
+def get_benchmark(benchmark_id):
+    for item in BENCHMARKS:
+        if item["id"] == benchmark_id:
+            return item
+    raise KeyError(benchmark_id)

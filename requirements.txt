@@ -1,0 +1,11 @@
+boto3
+meraki
+azure-identity
+azure-mgmt-storage
+cloudflare
+Flask
+Flask-WTF
+argon2-cffi
+waitress
+webauthn>=3.0.1,<4
+cryptography>=41

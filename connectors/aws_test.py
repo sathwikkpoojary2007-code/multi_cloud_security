@@ -1,12 +1,16 @@
-import boto3
+"""Manual AWS connection check. Run directly to contact AWS."""
 
-print("Starting AWS connection...")
 
-s3 = boto3.client("s3")
+def main():
+    import boto3
 
-response = s3.list_buckets()
+    print("Starting AWS connection...")
+    s3 = boto3.client("s3")
+    response = s3.list_buckets()
+    print("Connected to S3. Buckets found:")
+    for bucket in response.get("Buckets", []):
+        print("-", bucket["Name"])
 
-print("Buckets found:")
 
-for bucket in response["Buckets"]:
-    print("-", bucket["Name"])
+if __name__ == "__main__":
+    main()

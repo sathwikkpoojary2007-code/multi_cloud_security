@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }} · MultiCloudSecurity</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script src="{{ url_for('static', filename='report.js') }}" defer></script>
+  <style>
+    .report-wrap{max-width:1050px;margin:30px auto;padding:0 18px}.report-header{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:18px}.report-section{margin-top:14px}.report-resource{padding:14px 0;border-top:1px solid var(--line)}.report-resource h3{margin:0 0 5px}.report-meta{color:var(--muted);font-size:12px}.report-finding{padding:8px 10px;margin:7px 0;background:#fff4f3;border-left:3px solid var(--red);border-radius:4px}.report-control{padding:6px 0;border-bottom:1px solid #edf1f5}.report-print{display:flex;gap:8px;flex-wrap:wrap}
+    @media print{body{background:#fff}.report-wrap{max-width:none;margin:0}.report-print,.sidebar,.topbar{display:none!important}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.report-resource{break-inside:avoid}}
+  </style>
+</head>
+<body>
+<main class="report-wrap">
+  <div class="report-header"><div><div class="eyebrow">MULTICLOUDSECURITY · SCAN REPORT</div><h1>Cloud security results</h1><div class="report-meta">Generated {{ report.generated_at }} · Run {{ report.run_id }}</div></div><div class="report-print"><a class="button secondary" href="{{ url_for('reports_page') }}">Back to reports</a><a class="button secondary" href="{{ url_for('latest_report_text') if is_latest else url_for('report_text_by_id',run_id=report.run_id) }}">Download text</a><button class="button primary" type="button" data-print-report>Print / Save as PDF</button></div></div>
+  <section class="grid metrics">
+    <article class="metric blue"><div class="metric-label">Resources</div><div class="metric-value">{{ report.summary.resource_count }}</div></article>
+    <article class="metric red"><div class="metric-label">Findings</div><div class="metric-value">{{ report.summary.finding_count }}</div></article>
+    <article class="metric gold"><div class="metric-label">Average risk</div><div class="metric-value">{{ report.summary.average_risk }}<small style="font-size:12px"> / 100</small></div></article>
+    <article class="metric green"><div class="metric-label">Evidence coverage</div><div class="metric-value">{{ report.summary.average_risk_coverage }}<small style="font-size:12px">%</small></div></article>
+  </section>
+  <section class="card card-pad report-section"><h2 class="card-title">Provider collection</h2>{% for name, provider in report.providers.items() %}<div class="dimension-row"><span>{{ name|title }}</span><span class="badge {{ 'pass' if provider.status=='processed' else 'fail' }}">{{ provider.status }}</span><b>{{ provider.count }} resource(s)</b></div>{% else %}<p class="muted">Provider collection details are not available.</p>{% endfor %}</section>
+  <section class="card card-pad report-section"><h2 class="card-title">Resources and findings</h2>{% for resource in report.resources %}<article class="report-resource"><h3>{{ resource.resource_id }}</h3><div class="report-meta">{{ resource.provider|title }} · {{ resource.resource_type }} · Risk {{ resource.risk_score if resource.risk_score is not none else 'not scored' }} / 100 · Evidence {{ resource.risk_coverage }}%</div>{% for finding in resource.findings %}<div class="report-finding"><b>{{ finding.severity }} · {{ finding.title }}</b><div class="report-meta">{{ finding.rule }}{% if finding.description %} · {{ finding.description }}{% endif %}</div></div>{% else %}<p class="report-meta">No active findings in this scan.</p>{% endfor %}{% if resource.benchmarks %}<h4>Control results</h4>{% for control in resource.benchmarks %}<div class="report-control"><b>{{ control.status }}</b> · {{ control.benchmark_id }} · {{ control.name }}</div>{% endfor %}{% endif %}</article>{% else %}<p class="muted">This report contains no resources.</p>{% endfor %}</section>
+  <p class="report-meta report-section">This report reflects evidence collected at scan time. “Not evaluated” means the scan did not have enough evidence to assess that control.</p>
+</main>
+</body>
+</html>

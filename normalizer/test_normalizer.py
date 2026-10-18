@@ -1,29 +1,23 @@
 import json
-import os
-import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from normalizer.common_model import normalize_s3_bucket
 
-from common_model import normalize_s3_bucket
 
-project_folder = r"C:\Users\Prakhyath L\MultiCloudSecurity"
+# Find the project root automatically
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-data_file = os.path.join(
-    project_folder,
-    "data",
-    "aws_s3_security_raw.json"
-)
+data_file = BASE_DIR / "data" / "aws_s3_security_raw.json"
 
 print("Reading:", data_file)
 
 with open(data_file, "r") as file:
-    buckets = json.load(file)
+    raw_data = json.load(file)
 
-print("Buckets found:", len(buckets))
 
-for bucket in buckets:
+for bucket in raw_data:
+
     normalized = normalize_s3_bucket(bucket)
 
-    print("NORMALIZED RESOURCE")
+    print("\n========== NORMALIZED RESOURCE ==========")
     print(json.dumps(normalized, indent=4))
-    print("-----------------------------")

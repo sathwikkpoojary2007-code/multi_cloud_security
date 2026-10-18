@@ -1,0 +1,14 @@
+[
+  {
+    "provider": "aws",
+    "resource_type": "storage_bucket",
+    "bucket_name": "demo-public-bucket",
+    "public_access_block": {
+      "BlockPublicAcls": false,
+      "IgnorePublicAcls": false,
+      "BlockPublicPolicy": false,
+      "RestrictPublicBuckets": false
+    },
+    "encryption": null
+  }
+]

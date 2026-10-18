@@ -1,0 +1,200 @@
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.
+WARNING:botocore.credentials:Refreshing temporary credentials failed during mandatory refresh period.
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2633, in refresh_credentials
+    response = client.create_o_auth2_token(
+        tokenInput={
+    ...<3 lines>...
+        },
+    )
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 606, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\context.py", line 123, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\client.py", line 1094, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.AccessDeniedException: An error occurred (AccessDeniedException) when calling the CreateOAuth2Token operation: The refresh token has expired.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 600, in _protected_refresh
+    metadata = self._refresh_using()
+  File "C:\Users\ASUS\AppData\Local\Programs\Python\Python314\Lib\site-packages\botocore\credentials.py", line 2643, in refresh_credentials
+    raise LoginRefreshRequired() from e
+botocore.exceptions.LoginRefreshRequired: Your session has expired or credentials have changed. Please reauthenticate using 'aws login'.

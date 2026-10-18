@@ -1,0 +1,14 @@
+[
+  {
+    "provider": "azure",
+    "resource_type": "storage_account",
+    "resource_id": "demo-subscription/demo-storage",
+    "name": "demo-storage",
+    "location": "example-region",
+    "public_network_access": "Enabled",
+    "allow_blob_public_access": false,
+    "https_traffic_only": true,
+    "minimum_tls_version": "TLS1_2",
+    "encryption": "Microsoft.Storage"
+  }
+]

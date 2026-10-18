@@ -1,0 +1,15 @@
+[
+  {
+    "provider": "cloudflare",
+    "account_id": "demo-account-001",
+    "account_name": "Demo Cloudflare Account",
+    "zones": [
+      {
+        "zone_id": "demo-zone-001",
+        "zone_name": "example.invalid",
+        "status": "active",
+        "security_rules": []
+      }
+    ]
+  }
+]

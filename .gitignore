@@ -8,5 +8,12 @@ venv/
 .env.*
 
 data/*.json
+data/*.sqlite3
+data/reports/
 
 .vscode/
+data/dashboard_secret.key
+data/provider_credentials.key
+data/provider_credentials.enc
+data/provider_credentials.tmp
+data/demo_portfolio.json

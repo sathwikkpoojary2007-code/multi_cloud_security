@@ -1,0 +1,19 @@
+[
+  {
+    "organization": "Demo organization",
+    "network": "Demo office",
+    "network_id": "demo-network-001",
+    "firewall_rules": {
+      "rules": [
+        {
+          "comment": "Example overly broad rule",
+          "policy": "allow",
+          "protocol": "Any",
+          "srcCidr": "Any",
+          "destCidr": "Any",
+          "syslogEnabled": false
+        }
+      ]
+    }
+  }
+]

@@ -19,3 +19,7 @@ def check_cisco_security(resource):
         })
 
     return findings
+
+
+# Backward-compatible name used by the original Cisco risk example.
+check_cisco_firewall = check_cisco_security

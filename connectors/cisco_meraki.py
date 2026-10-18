@@ -1,54 +1,43 @@
-import os
+"""Read security configuration from Cisco Meraki networks."""
+
 import json
-import meraki
+import os
+from pathlib import Path
 
-print("Starting Cisco Meraki security data collection...")
 
-api_key = os.environ.get("MERAKI_DASHBOARD_API_KEY")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-if not api_key:
-    print("ERROR: Meraki API key not found.")
-    exit()
 
-dashboard = meraki.DashboardAPI(
-    api_key=api_key,
-    suppress_logging=True
-)
+def collect_cisco_security_data(api_key=None):
+    api_key = api_key or os.environ.get("MERAKI_DASHBOARD_API_KEY")
+    if not api_key:
+        raise ValueError("MERAKI_DASHBOARD_API_KEY is not configured")
 
-all_data = []
+    import meraki
 
-organizations = dashboard.organizations.getOrganizations()
-
-for org in organizations:
-    org_id = org["id"]
-
-    networks = dashboard.organizations.getOrganizationNetworks(org_id)
-
-    for network in networks:
-        network_id = network["id"]
-
-        network_data = {
-            "organization": org["name"],
-            "network": network["name"],
-            "network_id": network_id
-        }
-
-        try:
-            firewall = dashboard.appliance.getNetworkApplianceFirewallL3FirewallRules(
-                network_id
-            )
-
-            network_data["firewall_rules"] = firewall
-
-        except Exception as e:
-            network_data["firewall_rules"] = {
-                "error": str(e)
+    dashboard = meraki.DashboardAPI(api_key=api_key, suppress_logging=True)
+    all_data = []
+    for org in dashboard.organizations.getOrganizations():
+        for network in dashboard.organizations.getOrganizationNetworks(org["id"]):
+            network_data = {
+                "organization": org["name"],
+                "network": network["name"],
+                "network_id": network["id"],
             }
+            try:
+                network_data["firewall_rules"] = (
+                    dashboard.appliance.getNetworkApplianceFirewallL3FirewallRules(network["id"])
+                )
+            except Exception as error:
+                network_data["firewall_rules"] = {"error": str(error)}
+            all_data.append(network_data)
+    return all_data
 
-        all_data.append(network_data)
 
-with open("data/cisco_raw.json", "w") as file:
-    json.dump(all_data, file, indent=4)
-
-print("Cisco security data saved successfully.")
-print(json.dumps(all_data, indent=4))
+if __name__ == "__main__":
+    data = collect_cisco_security_data()
+    output = PROJECT_ROOT / "data" / "cisco_raw.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    print(f"Cisco Meraki networks collected: {len(data)}")
+    print(f"Saved: {output}")

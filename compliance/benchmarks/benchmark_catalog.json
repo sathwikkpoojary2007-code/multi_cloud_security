@@ -1,0 +1,11 @@
+{
+  "name": "MultiCloudSecurity Combined Benchmark Baseline",
+  "version": "0.1",
+  "source_documents": [
+    "CIS Controls v8.1.2",
+    "NIST CSF 2.0",
+    "NIST SP 800-53 Revision 5 / 5.1-derived control data"
+  ],
+  "official_crosswalk": false,
+  "benchmark_items": "__see_mappings.py__"
+}

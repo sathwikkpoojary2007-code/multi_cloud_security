@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}{{ page_title }}{% endblock %} · MultiCloudSecurity</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css', v='20261018-cursor-glow-strong') }}">
+</head>
+<body>
+  <div class="cursor-orb" id="cursor-orb" aria-hidden="true"></div>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('dashboard_page') }}"><span class="brand-mark">◈</span><span><b>MultiCloudSecurity</b><small>Detect · Fix · Verify · Secure</small></span></a>
+      <div class="side-label">Workspace</div>
+      <nav class="nav-list">
+        {% for key,label,icon,endpoint in navigation %}
+        <a class="nav-link {% if page == key %}active{% endif %}" href="{{ url_for(endpoint) }}"><span class="nav-icon">{{ icon }}</span>{{ label }}</a>
+        {% endfor %}
+      </nav>
+      <div class="side-label providers-label">Cloud accounts</div>
+      <div class="cloud-link"><i class="provider-dot aws"></i>AWS</div>
+      <div class="cloud-link"><i class="provider-dot azure"></i>Azure</div>
+      <div class="cloud-link"><i class="provider-dot cisco"></i>Cisco Meraki</div>
+      <div class="cloud-link"><i class="provider-dot cloudflare"></i>Cloudflare</div>
+      <div class="sidebar-foot"><span class="online-dot"></span>Local security workspace<small>Snapshots and reports stay here</small></div>
+    </aside>
+    <main class="main-shell">
+      <header class="topbar">
+        <div class="crumb"><span>Security workspace</span><b>/</b><strong>{{ page_title }}</strong></div>
+        <div class="top-actions">
+          {% if current_user.role == 'admin' %}<a class="top-icon" href="{{ url_for('connections_page') }}" aria-label="Service connections" title="Service connections">⌁</a>{% endif %}
+          {% if page != 'settings' %}<a class="top-icon" href="{{ url_for('settings_page') }}" aria-label="Settings">⚙</a>{% endif %}
+          <span class="avatar">{{ current_user.username[:1]|upper }}</span>
+          <div class="user-chip"><b>{{ current_user.username }}</b><small>{{ current_user.role|title }}</small></div>
+          <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="logout" type="submit">Sign out</button></form>
+        </div>
+      </header>
+      <section class="page-content">
+        {% if demo_portfolio_loaded %}<div class="flash info">Fictional evaluator demo portfolio is active. Demo fixes update local sample data only; they never contact or change a cloud account.</div>{% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}<div class="flash-stack">{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  {% if current_user.role in ['admin','operator'] %}
+  <div class="modal-backdrop" id="scan-modal"><section class="modal"><h2>Scan cloud resources</h2><p>Collect current provider security configuration and update the inventory. Scanning is read only.</p><form id="scan-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><div class="scan-options">{% for provider in ['aws','azure','cisco','cloudflare'] %}<label class="check-label"><input type="checkbox" name="providers" value="{{ provider }}" checked>{{ provider|title }}</label>{% endfor %}</div><label class="check-label" style="margin-top:15px"><input type="checkbox" id="auto-scan">Enable repeated scans every 5 minutes while this browser is open</label><div class="muted small-text" style="margin-top:5px">Repeated scans call the selected cloud APIs and may use API quota.</div><div class="modal-actions"><button class="button secondary" type="button" data-close-modal>Cancel</button><button class="button primary" type="submit">Start scan</button></div></form></section></div>
+  {% endif %}
+  <div class="scan-toast" id="scan-toast" role="status"></div>
+  <section class="assistant-panel" id="cloud-assistant" aria-label="Cloud security assistant" hidden data-provider="{{ resource.provider if resource is defined else '' }}" data-resource-id="{{ resource.resource_id if resource is defined else '' }}">
+    <header class="assistant-head"><div><b>Cloud Security Assistant</b><small>Ask about cloud services or this resource</small></div><button class="assistant-close" type="button" aria-label="Close assistant">×</button></header>
+    <div class="assistant-disclaimer">Answers use the saved scan and built-in cloud security guidance. Verify provider settings before applying changes.</div>
+    <div class="assistant-messages" id="assistant-messages" aria-live="polite"><div class="assistant-message assistant-bot">Hi! Ask how to fix a finding, or ask a cloud security question about AWS, Azure, Meraki, Cloudflare, IAM, networking, encryption, or logging.</div></div>
+    <form class="assistant-form" id="assistant-form"><label class="sr-only" for="assistant-input">Your cloud security question</label><input id="assistant-input" maxlength="1500" autocomplete="off" placeholder="Ask a cloud security question…" required><button class="button primary" type="submit">Ask</button></form>
+  </section>
+  <button class="assistant-launch" id="assistant-launch" type="button" aria-controls="cloud-assistant" aria-expanded="false"><span>✦</span> Cloud assistant</button>
+  <script src="{{ url_for('static', filename='app.js', v='20261018-cursor-glow') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
