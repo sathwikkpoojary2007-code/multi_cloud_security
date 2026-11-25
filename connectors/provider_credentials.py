@@ -50,7 +50,10 @@ def statuses():
         "cloudflare": ("api_token",),
     }
     configured = {name: all(values.get(name, {}).get(key) for key in fields) for name, fields in required.items()}
-    configured["aws"] = configured["aws"] or bool(os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY")) or bool(os.environ.get("AWS_PROFILE"))
+    aws = values.get("aws", {})
+    env_keys_present = bool(os.environ.get("AWS_ACCESS_KEY_ID") and os.environ.get("AWS_SECRET_ACCESS_KEY"))
+    saved_keys_present = bool(aws.get("access_key_id") and aws.get("secret_access_key"))
+    configured["aws"] = configured["aws"] or bool(aws.get("profile")) or bool(aws.get("role_arn") and (os.environ.get("AWS_PROFILE") or env_keys_present or saved_keys_present or aws.get("profile"))) or env_keys_present or bool(os.environ.get("AWS_PROFILE"))
     configured["azure"] = configured["azure"] or bool(os.environ.get("AZURE_SUBSCRIPTION_ID"))
     configured["cisco"] = configured["cisco"] or bool(os.environ.get("MERAKI_DASHBOARD_API_KEY"))
     configured["cloudflare"] = configured["cloudflare"] or bool(os.environ.get("CLOUDFLARE_API_TOKEN"))

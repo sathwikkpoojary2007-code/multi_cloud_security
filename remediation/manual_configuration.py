@@ -44,14 +44,14 @@ def apply_changes(provider, resource, changes, credentials):
     resource_id = resource["resource_id"]
     if provider == "aws":
         import boto3
+        from connectors.aws_session import create_session
         auth = credentials or {}
-        aws_session = boto3.Session(
-            aws_access_key_id=auth.get("access_key_id") or None,
-            aws_secret_access_key=auth.get("secret_access_key") or None,
-            aws_session_token=auth.get("session_token") or None,
-        )
         region = resource.get("metadata", {}).get("region") or auth.get("region")
-        client = aws_session.client("s3", region_name=region) if region else aws_session.client("s3")
+        if auth.get("access_key_id") or auth.get("role_arn") or auth.get("profile"):
+            aws_session = create_session(auth, region_name=region)
+            client = aws_session.client("s3", region_name=region) if region else aws_session.client("s3")
+        else:
+            client = boto3.client("s3", region_name=region) if region else boto3.client("s3")
         client.put_public_access_block(Bucket=resource_id, PublicAccessBlockConfiguration=changes["public_access_block"])
         return {"status": "APPLIED", "provider": provider, "resource_id": resource_id, "public_access_block": changes["public_access_block"]}
     if provider == "azure":

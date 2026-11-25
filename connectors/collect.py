@@ -33,6 +33,34 @@ def collect(provider, credentials=None):
     raise ValueError(f"Unknown provider: {provider}")
 
 
+def collect_single(provider, resource_id, extra_params=None, credentials=None):
+    """Collect security data for a single resource (e.g. bucket, storage account, network, zone)."""
+    extra_params = extra_params or {}
+    if credentials is None:
+        from connectors.provider_credentials import get
+        credentials = get(provider)
+
+    if provider == "aws":
+        from connectors.aws_security_connector import collect_single_bucket_security
+        region = extra_params.get("region")
+        return collect_single_bucket_security(resource_id, region_name=region, credentials=credentials)
+
+    if provider == "azure":
+        from connectors.azure_connector import collect_single_azure_storage
+        resource_group = extra_params.get("resource_group")
+        return collect_single_azure_storage(resource_id, resource_group=resource_group, credentials=credentials)
+
+    if provider == "cisco":
+        from connectors.cisco_meraki import collect_single_cisco_network
+        return collect_single_cisco_network(resource_id, api_key=credentials.get("api_key"))
+
+    if provider == "cloudflare":
+        from connectors.cloudflare_connector import collect_single_cloudflare_zone
+        return collect_single_cloudflare_zone(resource_id, api_token=credentials.get("api_token"))
+
+    raise ValueError(f"Unknown provider: {provider}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Collect read-only security snapshots from cloud providers.")
     parser.add_argument("providers", nargs="+", choices=tuple(OUTPUTS) + ("all",))

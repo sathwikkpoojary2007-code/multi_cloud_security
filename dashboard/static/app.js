@@ -27,6 +27,10 @@
   }
 
   function notify(message, error = false) {
+    if (document.body.dataset.page === "dashboard" && error) {
+      message = "Check Settings → Recent scans or Connections for details.";
+      error = false;
+    }
     if (!toast) return;
     toast.textContent = message;
     toast.style.background = error ? "#9f3440" : "#182d44";
@@ -112,7 +116,9 @@
       notify(data.message || "Scanning…");
       if (["completed", "completed_with_errors", "failed"].includes(data.status)) {
         if (data.status === "failed") throw new Error(data.result?.error || data.message || "Scan failed.");
-        if (data.status === "completed_with_errors") notify("Scan finished with provider errors. Review scan status and credentials.", true);
+        if (data.status === "completed_with_errors") {
+          notify("Scan finished. Provider details are available in Settings → Recent scans.");
+        }
         else notify("Scan complete. Refreshing the security overview.");
         await new Promise(resolve => setTimeout(resolve, 800));
         window.location.reload();

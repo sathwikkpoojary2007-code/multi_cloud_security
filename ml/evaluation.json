@@ -1,0 +1,53 @@
+{
+  "evaluation_type": "held-out synthetic simulation; not real cloud validation",
+  "examples": 2000,
+  "accuracy": 0.9185,
+  "per_class": {
+    "LOW": {
+      "precision": 0.9824,
+      "recall": 0.979,
+      "support": 571
+    },
+    "MEDIUM": {
+      "precision": 0.942,
+      "recall": 0.966,
+      "support": 706
+    },
+    "HIGH": {
+      "precision": 0.9119,
+      "recall": 0.8063,
+      "support": 475
+    },
+    "CRITICAL": {
+      "precision": 0.7422,
+      "recall": 0.8589,
+      "support": 248
+    }
+  },
+  "confusion_matrix": {
+    "LOW": {
+      "LOW": 559,
+      "MEDIUM": 12,
+      "HIGH": 0,
+      "CRITICAL": 0
+    },
+    "MEDIUM": {
+      "LOW": 10,
+      "MEDIUM": 682,
+      "HIGH": 2,
+      "CRITICAL": 12
+    },
+    "HIGH": {
+      "LOW": 0,
+      "MEDIUM": 30,
+      "HIGH": 383,
+      "CRITICAL": 62
+    },
+    "CRITICAL": {
+      "LOW": 0,
+      "MEDIUM": 0,
+      "HIGH": 35,
+      "CRITICAL": 213
+    }
+  }
+}

@@ -1,5 +1,8 @@
 # MultiCloudSecurity
 
+For a friend-friendly end-to-end explanation, folder map, methodology, and
+flowchart images, see [the project walkthrough](docs/project_walkthrough.md).
+
 MultiCloudSecurity is a multi-page cloud security workspace for AWS S3,
 Azure Storage, Cisco Meraki, and Cloudflare. It collects provider configuration,
 normalizes evidence, evaluates security rules and project benchmarks, ranks
@@ -93,6 +96,50 @@ API access. Secrets are encrypted in the local data directory. Each service
 card has a **Login to…** button that opens its official portal in a new tab.
 The app does not collect cloud-console passwords; it uses provider APIs.
 
+### Connect real AWS S3 buckets
+
+AWS is discovered from the authenticated account; there is no per-bucket API
+address to enter. The AWS connection form supports static credentials, the
+machine's standard AWS profile/environment/role credential chain, and an
+optional cross-account role ARN. For cross-account access, configure the
+target account role trust policy to trust the app's base AWS identity and
+grant that role the permissions below. An External ID can be used when the
+trust policy requires one. Click **Save & test**: the result reports the AWS
+account identity and how many buckets had both security settings readable. Then choose AWS under
+**Scan resources**.
+
+Read-only discovery and posture checks need `s3:ListAllMyBuckets`,
+`s3:GetBucketLocation`, `s3:GetBucketPublicAccessBlock`, and
+`s3:GetEncryptionConfiguration` on the account/buckets. The supported live
+fix additionally needs `s3:PutBucketPublicAccessBlock` on the target bucket.
+Keep those write permissions out of scan-only identities. Bucket-level
+AccessDenied errors can mean the identity lists a bucket but cannot inspect
+its settings; the scan records those fields as unevaluated rather than treating
+them as secure.
+
+### Connect the other live services
+
+- **Azure Storage:** enter the subscription ID and a service principal's tenant,
+  client ID, and secret. Alternatively, leave all three identity fields blank
+  and configure `DefaultAzureCredential` on the app host. Assign Azure Reader
+  to scan; the supported hardening fix needs Storage Account Contributor on the
+  affected storage accounts. The connection test reports the subscription and
+  the number of storage accounts read.
+- **Cisco Meraki:** enter a Dashboard API key whose role can list organizations
+  and networks and read appliance firewall rules. The supported fix changes
+  broad allow rules to deny, so the identity also needs firewall-rule update
+  rights. The connection test reports network discovery and how many networks'
+  firewall settings were readable.
+- **Cloudflare:** enter an API token scoped to the relevant accounts and zones.
+  Scanning needs account/zone and ruleset read access; the supported managed WAF
+  fix needs zone ruleset edit access. The connection test reports discovered
+  accounts/zones and flags zones whose WAF/ruleset details could not be read.
+
+All four providers use **Save & test** before scanning. A successful credential
+save only means the app has a credential; the test checks actual API access.
+Live fixes are limited to the reviewed actions shown in Remediation and still
+require administrator approval. They do not automatically fix every finding.
+
 Credential sources when no saved connection is configured:
 
 - AWS: the standard boto3 credential chain (`AWS_PROFILE`, environment, or IAM
@@ -139,13 +186,32 @@ Review the displayed impact before approving changes that can interrupt access.
 
 ## Machine learning
 
-`ml/model.json` contains the trained Gaussian Naive Bayes risk triage baseline;
-`python -m ml.train_model` regenerates it. It predicts LOW, MEDIUM, HIGH, or CRITICAL from
-normalized dimensions, calculated risk, and finding count. The training set is
-synthetic and curated, not a labeled production incident corpus. Predictions
-help order review and surface recommendations; they do not authorize changes
-and are not a validated security detector. Replace the demo training examples with
-reviewed, representative labels before relying on model performance claims.
+`ml/model.json` contains a Gaussian Naive Bayes posture triage model trained
+from reproducible simulated resource configurations. `python -m ml.train_model`
+regenerates it and writes a held-out synthetic evaluation to
+`ml/evaluation.json`. Its features are the seven normalized posture dimensions;
+it does not consume the rule engine's finding count, risk score, or benchmark
+outcomes. It scores the same collected posture evidence through a separate
+learned classifier; it is not an independent sensor and cannot discover
+configuration the connectors did not collect. Detector rules and benchmark
+mappings still run separately and are shown with ML triage in the dashboard.
+
+The held-out score measures agreement with the synthetic scenario generator,
+not accuracy on real cloud accounts. It cannot support a 95% real-world claim.
+Unknown evidence remains unknown, and ML cannot authorize or verify a fix. To
+incorporate analyst-reviewed labels, copy `ml/reviewed_labels_template.csv`,
+add reviewed rows with values from 0 to 1, and run:
+
+```powershell
+python -m ml.train_model --reviewed-csv path\to\reviewed_labels.csv
+```
+
+Each retraining run uses a deterministic held-out synthetic set and reports its
+metrics. Reviewed labels are included in training only; do not treat synthetic
+holdout performance as a validation score for the reviewed data. Collect a
+separate, account-disjoint labeled evaluation set before production claims or
+automatic ML-driven actions. The app's periodic scan is polling, not event
+streaming; live scanning requires provider credentials and read permissions.
 
 ## Pages
 

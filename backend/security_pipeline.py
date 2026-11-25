@@ -128,16 +128,28 @@ def summarize_results(resources):
     }
 
 
-def run_analysis(data_dir=DEFAULT_DATA_DIR, output_path=DEFAULT_REPORT_PATH):
+def run_analysis(data_dir=DEFAULT_DATA_DIR, output_path=DEFAULT_REPORT_PATH, provider_errors=None, provider_partial=None):
     """Analyze available provider snapshots and write a dashboard report."""
     data_dir = Path(data_dir)
+    provider_errors = provider_errors or {}
+    provider_partial = provider_partial or {}
     all_resources = []
     provider_status = {}
 
     for provider in PROVIDERS:
+        if provider in provider_errors:
+            provider_status[provider] = {
+                "status": "error",
+                "file": PROVIDERS[provider][0],
+                "message": str(provider_errors[provider]),
+            }
+            continue
         try:
             resources, status = _process_provider(provider, data_dir)
             all_resources.extend(resources)
+            if provider in provider_partial and status.get("status") == "processed":
+                status["status"] = "partial"
+                status["message"] = str(provider_partial[provider])
             provider_status[provider] = status
         except Exception as error:
             provider_status[provider] = {

@@ -7,7 +7,7 @@
   <title>{% block title %}{{ page_title }}{% endblock %} · MultiCloudSecurity</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='app.css', v='20261018-cursor-glow-strong') }}">
 </head>
-<body>
+<body data-page="{{ page|default('') }}">
   <div class="cursor-orb" id="cursor-orb" aria-hidden="true"></div>
   <div class="app-shell">
     <aside class="sidebar">
@@ -39,7 +39,7 @@
       <section class="page-content">
         {% if demo_portfolio_loaded %}<div class="flash info">Fictional evaluator demo portfolio is active. Demo fixes update local sample data only; they never contact or change a cloud account.</div>{% endif %}
         {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}<div class="flash-stack">{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+          {% if messages %}<div class="flash-stack">{% for category,message in messages %}{% if page != 'dashboard' or category != 'error' %}<div class="flash {{ category }}">{{ message }}</div>{% endif %}{% endfor %}</div>{% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
       </section>
@@ -56,7 +56,7 @@
     <form class="assistant-form" id="assistant-form"><label class="sr-only" for="assistant-input">Your cloud security question</label><input id="assistant-input" maxlength="1500" autocomplete="off" placeholder="Ask a cloud security question…" required><button class="button primary" type="submit">Ask</button></form>
   </section>
   <button class="assistant-launch" id="assistant-launch" type="button" aria-controls="cloud-assistant" aria-expanded="false"><span>✦</span> Cloud assistant</button>
-  <script src="{{ url_for('static', filename='app.js', v='20261018-cursor-glow') }}" defer></script>
+  <script src="{{ url_for('static', filename='app.js', v='20261030-dashboard-quiet') }}" defer></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

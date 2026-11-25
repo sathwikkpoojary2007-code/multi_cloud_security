@@ -253,7 +253,7 @@ def get_scan_job(job_id):
 def recent_scan_jobs(limit=30):
     with _connect() as db:
         rows = db.execute(
-            "SELECT id,created_at,updated_at,requested_by,providers,status,message FROM scan_jobs ORDER BY created_at DESC LIMIT ?",
+            "SELECT id,created_at,updated_at,requested_by,providers,status,message,result FROM scan_jobs ORDER BY created_at DESC LIMIT ?",
             (limit,),
         ).fetchall()
     return [dict(row) for row in rows]

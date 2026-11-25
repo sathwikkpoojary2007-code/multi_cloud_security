@@ -37,7 +37,7 @@ from backend.security_pipeline import (
 )
 from compliance.benchmarks.benchmark_engine import attach_benchmarks
 from connectors.collect import OUTPUTS, collect
-from connectors.provider_credentials import save as save_provider_credentials, statuses as provider_connection_statuses
+from connectors.provider_credentials import get as get_provider_credentials, save as save_provider_credentials, statuses as provider_connection_statuses
 from dashboard.auth import (
     authenticate, audit, create_scan_job, create_user, get_scan_job, get_user,
     get_passkey, init_db, list_passkeys, list_users, passkey_credentials,
@@ -89,6 +89,21 @@ def _read_report():
         return report
     except (OSError, json.JSONDecodeError):
         return None
+
+
+def _run_analysis_preserving_provider_status(refreshed_provider=None):
+    """Keep failed/partial providers out of a rescan until their API read succeeds."""
+    report = _read_report() or {}
+    provider_errors = {}
+    provider_partial = {}
+    for provider, status in (report.get("providers") or {}).items():
+        if provider == refreshed_provider:
+            continue
+        if status.get("status") == "error":
+            provider_errors[provider] = status.get("message", "Provider collection previously failed")
+        elif status.get("status") == "partial":
+            provider_partial[provider] = status.get("message", "Some provider settings were not readable")
+    return run_analysis(provider_errors=provider_errors, provider_partial=provider_partial)
 
 
 def _base_resources(report):
@@ -269,6 +284,12 @@ def _page_context(page, title):
     summary.setdefault("findings_by_severity", {})
     summary.setdefault("benchmark_counts", {"PASS": 0, "FAIL": 0, "NOT_EVALUATED": 0})
     statuses = _status_counts(resources)
+    scan_jobs = recent_scan_jobs(20) if page == "settings" else []
+    for job in scan_jobs:
+        try:
+            job["result_data"] = json.loads(job.get("result") or "{}")
+        except json.JSONDecodeError:
+            job["result_data"] = {}
     return {
         "page": page,
         "page_title": title,
@@ -301,7 +322,7 @@ def _page_context(page, title):
         "users": list_users() if g.current_user["role"] == "admin" else [],
         "passkeys": list_passkeys(g.current_user["id"]) if page == "settings" and g.current_user["role"] == "admin" else [],
         "audit_events": recent_audit(100) if page in {"settings", "remediation"} else [],
-        "scan_jobs": recent_scan_jobs(20) if page == "settings" else [],
+        "scan_jobs": scan_jobs,
         "bind_address": os.environ.get("MCS_HOST", "127.0.0.1"),
         "secure_cookie": os.environ.get("COOKIE_SECURE", "0").lower() in {"1", "true", "yes"},
         "connection_status": provider_connection_statuses(),
@@ -318,9 +339,18 @@ def _render(page, title, template=None, **extra):
 
 def _scan_worker(app, job_id, username, providers):
     errors = {}
-    collected = 0
+    provider_errors = {}
+    provider_partial = {}
     with app.app_context():
         try:
+            prior_report = _read_report() or {}
+            for provider, status in (prior_report.get("providers") or {}).items():
+                if provider in providers:
+                    continue
+                if status.get("status") == "error":
+                    provider_errors[provider] = status.get("message", "Provider collection previously failed")
+                elif status.get("status") == "partial":
+                    provider_partial[provider] = status.get("message", "Some provider settings were not readable")
             update_scan_job(job_id, "running", "Starting provider scans")
             for provider in providers:
                 update_scan_job(job_id, "running", f"Collecting {provider}")
@@ -329,13 +359,35 @@ def _scan_worker(app, job_id, username, providers):
                     output = DEFAULT_DATA_DIR / OUTPUTS[provider]
                     output.parent.mkdir(parents=True, exist_ok=True)
                     output.write_text(json.dumps(records, indent=2, ensure_ascii=False), encoding="utf-8")
-                    collected += 1
-                    errors[provider] = {"status": "collected", "count": len(records)}
+                    partial_messages = []
+                    if provider == "aws":
+                        inaccessible = [record for record in records if record.get("collection_errors")]
+                        if inaccessible:
+                            examples = [f"{item.get('bucket_name')}: {error}" for item in inaccessible[:2] for error in item.get("collection_errors", [])[:1]]
+                            partial_messages.append(f"{len(inaccessible)} bucket(s) had unreadable settings" + (f" ({'; '.join(examples)})" if examples else ""))
+                    elif provider == "cisco":
+                        inaccessible = [record for record in records if isinstance(record.get("firewall_rules"), dict) and record["firewall_rules"].get("error")]
+                        if inaccessible:
+                            examples = [str(record["firewall_rules"]["error"])[:180] for record in inaccessible[:2]]
+                            partial_messages.append(f"Firewall settings were unreadable for {len(inaccessible)} network(s): {'; '.join(examples)}")
+                    elif provider == "cloudflare":
+                        zones = [zone for account in records for zone in account.get("zones", [])]
+                        inaccessible = [zone for zone in zones if zone.get("waf_check_error") or zone.get("security_rules_error")]
+                        if inaccessible:
+                            examples = [str(zone.get("waf_check_error") or zone.get("security_rules_error"))[:180] for zone in inaccessible[:2]]
+                            partial_messages.append(f"WAF or ruleset settings were unreadable for {len(inaccessible)} zone(s): {'; '.join(examples)}")
+                    if partial_messages:
+                        message = "; ".join(partial_messages)[:600]
+                        provider_partial[provider] = message
+                        errors[provider] = {"status": "partial", "count": len(records), "message": message}
+                    else:
+                        errors[provider] = {"status": "collected", "count": len(records)}
                 except Exception as error:
                     errors[provider] = {"status": "error", "message": str(error)}
+                    provider_errors[provider] = str(error)
             update_scan_job(job_id, "running", "Analyzing collected snapshots")
-            report = run_analysis()
-            failed = any(value["status"] == "error" for value in errors.values())
+            report = run_analysis(provider_errors=provider_errors, provider_partial=provider_partial)
+            failed = any(value["status"] in {"error", "partial"} for value in errors.values())
             result = {"providers": errors, "summary": report["summary"]}
             state = "completed_with_errors" if failed else "completed"
             update_scan_job(job_id, state, "Scan complete" if not failed else "Scan complete with provider errors", json.dumps(result))
@@ -610,7 +662,7 @@ def create_app():
     def train_ml():
         train_model()
         audit(g.current_user["username"], "ml.model_trained", "risk-triage", "success", "synthetic-baseline")
-        flash("The baseline risk triage model has been trained and saved.", "success")
+        flash("The synthetic posture triage model was retrained. See the Machine Learning page for its held-out simulation score and limitations.", "success")
         return redirect(url_for("ml_page"))
 
     @app.get("/reports")
@@ -785,7 +837,7 @@ def create_app():
         return _render("settings", "Settings")
 
     connection_forms = [
-        ("aws", "Amazon Web Services", [("access_key_id", "Access key ID", "AKIA…"), ("secret_access_key", "Secret access key", "Secret key"), ("session_token", "Session token (optional)", "Temporary session token"), ("region", "Default region (optional)", "us-east-1")], "https://console.aws.amazon.com/s3/home"),
+        ("aws", "Amazon Web Services", [("profile", "AWS CLI profile (optional)", "default or company-sso"), ("access_key_id", "Access key ID (optional)", "AKIA…"), ("secret_access_key", "Secret access key (optional)", "Secret key"), ("session_token", "Session token (optional)", "Temporary session token"), ("region", "Default region (optional)", "us-east-1"), ("role_arn", "Cross-account role ARN (optional)", "arn:aws:iam::123456789012:role/MultiCloudSecurityReadOnly"), ("external_id", "External ID (optional)", "External ID from the role trust policy")], "https://console.aws.amazon.com/s3/home"),
         ("azure", "Microsoft Azure", [("subscription_id", "Subscription ID", "Subscription ID"), ("tenant_id", "Tenant ID", "Directory tenant ID"), ("client_id", "Client ID", "Application client ID"), ("client_secret", "Client secret", "Application secret")], "https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.Storage%2FStorageAccounts"),
         ("cisco", "Cisco Meraki", [("api_key", "Dashboard API key", "API key")], "https://dashboard.meraki.com/"),
         ("cloudflare", "Cloudflare", [("api_token", "API token", "Scoped API token")], "https://dash.cloudflare.com/"),
@@ -800,26 +852,74 @@ def create_app():
         if provider not in PROVIDERS:
             abort(404)
         allowed = {key for item_provider, _, fields, _portal in connection_forms if item_provider == provider for key, _, _ in fields}
-        save_provider_credentials(provider, {key: request.form.get(key, "") for key in allowed})
-        audit(g.current_user["username"], "provider.credentials_saved", provider, "success")
+        values = {key: request.form.get(key, "") for key in allowed}
+        entered = any(str(value).strip() for value in values.values())
+        existing = get_provider_credentials(provider)
+        if entered or existing:
+            save_provider_credentials(provider, values)
+            audit(g.current_user["username"], "provider.credentials_saved", provider, "success" if entered else "unchanged")
+        else:
+            audit(g.current_user["username"], "provider.credentials_saved", provider, "no_credentials_entered")
+        return entered
 
     @app.post("/connections/<provider>/save")
     @roles_required("admin")
     def save_connection(provider):
-        _save_connection(provider)
-        flash(f"{provider.title()} connection details saved encrypted on this computer.", "success")
+        entered = _save_connection(provider)
+        if provider == "aws" and not entered and not get_provider_credentials("aws"):
+            flash("No AWS credential values were entered or saved. The app will try this computer's default AWS credential chain; use Save & test to confirm account access.", "info")
+        else:
+            flash(f"{provider.title()} connection details saved encrypted on this computer.", "success")
         return redirect(url_for("connections_page"))
 
     @app.post("/connections/<provider>/test")
     @roles_required("admin")
     def test_connection(provider):
-        _save_connection(provider)
+        entered = _save_connection(provider)
         try:
+            identity = None
+            if provider == "aws":
+                from connectors.aws_session import get_account_identity
+                identity = get_account_identity(get_provider_credentials("aws"))
             records = collect(provider)
-            flash(f"{provider.title()} connection works. Read access confirmed for {len(records)} resource(s).", "success")
+            details = []
+            readable = True
+            if provider == "aws":
+                readable_count = sum(
+                    record.get("public_access_evaluated") and record.get("encryption_evaluated")
+                    for record in records
+                )
+                readable = readable_count == len(records)
+                details.append(f"account {identity.get('Account')} ({identity.get('Arn')}); {readable_count}/{len(records)} buckets had both security settings readable")
+                access_errors = [
+                    f"{record.get('bucket_name')}: {error}"
+                    for record in records
+                    for error in record.get("collection_errors", [])
+                ]
+                if access_errors:
+                    details.append("bucket errors: " + "; ".join(access_errors[:3]))
+            elif provider == "azure":
+                from connectors.provider_credentials import get as get_credentials
+                azure_credentials = get_credentials("azure")
+                subscription = azure_credentials.get("subscription_id") or os.environ.get("AZURE_SUBSCRIPTION_ID")
+                details.append(f"subscription {subscription}; read {len(records)} storage account(s)")
+            elif provider == "cisco":
+                failed_networks = [item for item in records if isinstance(item.get("firewall_rules"), dict) and item["firewall_rules"].get("error")]
+                readable = not failed_networks
+                details.append(f"read {len(records)} network(s); firewall settings readable for {len(records) - len(failed_networks)}/{len(records)}")
+            elif provider == "cloudflare":
+                zones = [zone for account in records for zone in account.get("zones", [])]
+                failed_zones = [zone for zone in zones if zone.get("waf_check_error") or zone.get("security_rules_error")]
+                readable = not failed_zones
+                details.append(f"read {len(records)} account(s) and {len(zones)} zone(s); WAF/ruleset details readable for {len(zones) - len(failed_zones)}/{len(zones)} zones")
+            level = "success" if readable else "error"
+            if not readable:
+                audit(g.current_user["username"], "provider.connection_test", provider, "partial", "; ".join(details))
+            flash(f"{provider.title()} connection {'works' if readable else 'is partial'}: {'; '.join(details)}. {'Check the provider permissions for this identity.' if not readable else ''}", level)
         except Exception as error:
             audit(g.current_user["username"], "provider.connection_test", provider, "failed", type(error).__name__)
-            flash(f"Could not connect to {provider.title()}: {str(error)[:250]}", "error")
+            prefix = "New credential values were saved, but" if entered else "Using the saved or host credentials,"
+            flash(f"{prefix} {provider.title()} connection test failed: {str(error)[:350]}", "error")
         return redirect(url_for("connections_page"))
 
     @app.post("/settings/users")
@@ -1001,7 +1101,7 @@ def create_app():
             refreshed = collect(provider)
             snapshot = DEFAULT_DATA_DIR / OUTPUTS[provider]
             snapshot.write_text(json.dumps(refreshed, indent=2, ensure_ascii=False), encoding="utf-8")
-            updated_report = run_analysis()
+            updated_report = _run_analysis_preserving_provider_status(refreshed_provider=provider)
             rescanned = next((r for r in updated_report["resources"]
                               if r.get("provider") == provider and r.get("resource_id") == resource_id), None)
             if rescanned is None:
@@ -1122,7 +1222,7 @@ def create_app():
             applied = action.get("status") == "APPLIED"
             snapshot = DEFAULT_DATA_DIR / OUTPUTS[provider]
             snapshot.write_text(json.dumps(collect(provider), indent=2, ensure_ascii=False), encoding="utf-8")
-            updated_report = run_analysis()
+            updated_report = _run_analysis_preserving_provider_status(refreshed_provider=provider)
             updated_resource = next((r for r in updated_report["resources"] if r.get("provider") == provider and r.get("resource_id") == resource_id), None)
             if not updated_resource:
                 raise RuntimeError("The provider rescan did not return this resource.")
